@@ -13,12 +13,27 @@ use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
+
+    /**
+     * index
+     *
+     * @return void
+     */
     public function index()
     {
+        //get posts
         $posts = Post::latest()->paginate(5);
-        return new PostResource(true, 'list data Posts', $posts);
+
+        //return collection of posts as a resource
+        return new PostResource(true, 'List Data Posts', $posts);
     }
 
+    /**
+     * store
+     *
+     * @param  mixed $request
+     * @return void
+     */
     public function store(Request $request)
     {
         //define validation rules
@@ -33,25 +48,30 @@ class PostController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // mengecek variabel tersebut berfungsi apa
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        // untuk mengupload
+        //upload image
         $image = $request->file('image');
         $image->storeAs('public/posts', $image->hashName());
 
-
-        //untuk menambahkan post
+        //create post
         $post = Post::create([
             'image'     => $image->hashName(),
             'title'     => $request->title,
             'content'   => $request->content,
         ]);
 
-
         //return response
         return new PostResource(true, 'Data Post Berhasil Ditambahkan!', $post);
+    }
+
+    /**
+     * show
+     *
+     * @param  mixed $post
+     * @return void
+     */
+    public function show(Post $post)
+    {
+        //return single post as a resource
+        return new PostResource(true, 'Data Post Ditemukan!', $post);
     }
 }
